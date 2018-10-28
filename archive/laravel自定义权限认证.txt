@@ -1,0 +1,109 @@
+Laravel 中间件提供了一种方便的机制来过滤进入应用的 HTTP请求，例如，Laravel包含验证用户身份权限的中间件。如果用户没有通过身份验证，中间件会重定向到登录页，引导用户登录。反之，中间件将允许该请求继续传递到应用程序。
+
+当然，除了身份验证以外，中间件还可以被用来执行各式各样的任务，如：CORS中间件负责为所有即将离开应用的响应添加适当的头信息；日志中间件可以记录所有传入应用的请求。
+
+Laravel 已经内置了一些中间件，包括身份验证、CSRF保护等。所有的中间件都放在 app/Http/Middleware 目录内。
+
+
+
+1、创建中间件
+
+这里要实现两个过滤，一是只允许管理员登录后台（RoleMiddleware），二是只有管理员用户有权限操作后台(AdminMiddleware)，
+
+没有通过验证则跳回登录页或者抛出异常页。创建命令：
+
+vagrant@homestead:~/Code/myblog$ php artisan make:middleware RoleMiddleware
+Middleware created successfully.
+vagrant@homestead:~/Code/myblog$ php artisan make:middleware AdminMiddleware
+Middleware created successfully.
+
+RoleMiddleware:
+
+namespace App\Http\Middleware;
+use Closure;
+use App\Models\User;
+class RoleMiddleware
+{
+    /**
+     * 只允许管理员登录
+     */
+    public function handle($request, Closure $next)
+    {
+        if($request->input('email')){
+            $user = User::where('email',$request->input('email'))->first();
+            if ($user->is_admin != 1) {
+                session()->flash('danger','您不是管理员');
+                return redirect('admin/login');
+            }
+        }
+        return $next($request);
+    }
+}
+
+
+
+
+
+
+AdminMiddleware:
+
+namespace App\Http\Middleware;
+use Closure;
+use Illuminate\Support\Facades\Auth;
+class AdminMiddleware
+{
+    /**
+     * 只允许管理员操作
+     */
+    public function handle($request, Closure $next)
+    {
+        if(Auth::check()){
+            $user = Auth::user();
+            if ($user->is_admin != 1) {
+                return abort(403);
+            }
+        }
+        return $next($request);
+    }
+}
+
+2、注册中间件，可以全局注册，也可以手动指定
+
+这里采用手动方式：
+
+如果你想为特殊的路由指定中间件，首先应该在 app/Http/Kernel.php 文件内为该中间件指定一个 键值。
+
+默认情况下 Kernel 类的 $routeMiddleware 属性已经包含了 Laravel 内置的中间件条目。加入自定义的中间件，
+
+只需把它附加到此列表并指定你定义的键值即可。例如：
+
+ 
+
+protected $routeMiddleware = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'adminAuth' => \App\Http\Middleware\AdminMiddleware::class,
+    ];
+
+
+3、使用中间件，使用路由组为请求加上中间件
+
+//后台路由组
+
+Route::group(['middleware' => 'adminAuth'], function () {
+    Route::get('/admin','IndexController@index')->name('admin');
+    ...
+});
+
+这里可以加上多个中间件名称，也可以直接在类的构造方法中调用：
+
+class ArticlesController extends Controller
+{
+public function __construct()
+{
+   $this->middleware('auth');
+}
+
+

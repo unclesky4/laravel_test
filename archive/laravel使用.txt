@@ -1,0 +1,39 @@
+laravel教程：  https://www.yiibai.com/laravel/laravel_installation.html
+
+
+Laravel环境安装：
+安装Composer
+
+初始化laravel项目：
+composer create-project laravel/laravel 项目名 5.4.*
+
+
+查看laravel版本：
+php artisan --version
+启动：
+php artisan serve
+
+
+
+laravel项目目录：
+
+    app − 该目录包含应用程序的核心代码。
+
+    bootstrap − 该目录包含应用程序引导脚本。
+
+    config − 该目录包含应用程序的配置文件。
+
+    database − 此文件夹包含数据库迁移和种子。
+
+    public − 这是应用程序的文档根目录。它启动Laravel应用。它还含有如JavaScript，CSS，图像等应用程序的资源
+
+    resources − 该目录包含原始资源，如LESS和Sass文件，本地化和语言文件和模板，都呈现为HTML。
+
+    storage − 该目录包含应用程序的存储，比如文件上传等。框架存储(缓存)和应用程序生成的日志。
+
+    test − 该目录包含了各种测试用例。
+
+    vendor − 该目录包含了 composer 的依赖关系。
+
+
+
