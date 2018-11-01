@@ -1,11 +1,12 @@
 laravel教程：  https://www.yiibai.com/laravel/laravel_installation.html
+				https://laravelacademy.org/laravel-docs-5_5
 
 
 Laravel环境安装：
 安装Composer
 
 初始化laravel项目：
-composer create-project laravel/laravel 项目名 5.4.*
+composer create-project laravel/laravel <项目名> 5.4.*
 
 
 查看laravel版本：
